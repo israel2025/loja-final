@@ -1,0 +1,33 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Ambiente
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Build frontend
+.next/
+out/
+
+# Uploads
+uploads/
+public/uploads/
+
+# Logs
+logs
+*.log
+debug.log
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Banco
+data/*.sqlite
+data/*.db
