@@ -1,10 +1,26 @@
-const path = require('path');
-const { readJSON } = require('../utils/fileDb');
-const productsFile = path.join(__dirname, '..', '..', 'data', 'products.json');
+const { Product } = require('../models');
 
-function listProducts(req, res) {
-  const products = readJSON(productsFile);
-  res.json(products);
-}
+const list = async (req, res, next) => {
+  try {
+    const items = await Product.findAll({ order: [['id','DESC']], limit: 200 });
+    res.json(items);
+  } catch (err) { next(err); }
+};
 
-module.exports = { listProducts };
+const get = async (req, res, next) => {
+  try {
+    const p = await Product.findByPk(req.params.id);
+    if (!p) return res.status(404).json({ message: 'Not found' });
+    res.json(p);
+  } catch (err) { next(err); }
+};
+
+const create = async (req, res, next) => {
+  try {
+    const { title, description, price, stock } = req.body;
+    const product = await Product.create({ title, description, price, stock, image: req.file ? `/uploads/${req.file.filename}` : null, vendorId: req.user && req.user.role === 'vendor' ? req.user.id : null });
+    res.json(product);
+  } catch (err) { next(err); }
+};
+
+module.exports = { list, get, create };

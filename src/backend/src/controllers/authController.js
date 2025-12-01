@@ -1,28 +1,27 @@
- const path = require('path');
-const { readJSON, writeJSON } = require('../utils/fileDb');
+const jwt = require('jsonwebtoken');
+const { User } = require('../models');
 
-const usersFile = path.join(__dirname, '..', '..', 'data', 'users.json');
+const register = async (req, res, next) => {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
+    const exists = await User.findOne({ where: { email } });
+    if (exists) return res.status(400).json({ message: 'Email already used' });
+    const user = await User.create({ name, email, password, role: role || 'client' });
+    return res.json({ id: user.id, email: user.email, name: user.name });
+  } catch (err) { next(err); }
+};
 
-function register(req, res) {
-  const { email, password, name } = req.body;
-  if (!email || !password || !name) return res.status(400).json({ error: 'Campos faltando' });
-
-  const users = readJSON(usersFile);
-  if (users.find(u => u.email === email)) return res.status(400).json({ error: 'Email já existe' });
-
-  const id = Date.now();
-  const user = { id, email, password, name, role: 'customer', createdAt: new Date().toISOString() };
-  users.push(user);
-  writeJSON(usersFile, users);
-  res.json({ ok: true, id });
-}
-
-function login(req, res) {
-  const { email, password } = req.body;
-  const users = readJSON(usersFile);
-  const u = users.find(x => x.email === email && x.password === password);
-  if (!u) return res.status(401).json({ error: 'Credenciais inválidas' });
-  res.json({ ok: true, user: { id: u.id, email: u.email, name: u.name, role: u.role } });
-}
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    const ok = await user.comparePassword(password);
+    if (!ok) return res.status(400).json({ message: 'Invalid credentials' });
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET || 'secret123', { expiresIn: '7d' });
+    res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+  } catch (err) { next(err); }
+};
 
 module.exports = { register, login };
