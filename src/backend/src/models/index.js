@@ -1,27 +1,13 @@
-const { Sequelize } = require('sequelize');
-const { sequelize } = require('../config/db');
+const sequelize = require('../config/db');
 
-const User = require('./User')(sequelize);
-const Vendor = require('./Vendor')(sequelize);
-const Product = require('./Product')(sequelize);
-const Order = require('./Order')(sequelize);
-const Withdrawal = require('./Withdrawal')(sequelize);
+require('./User');
+require('./Product');
+require('./Order');
+require('./Withdraw');
+require('./Vendor');
 
-// Associations
-Vendor.hasMany(Product, { foreignKey: 'vendorId' });
-Product.belongsTo(Vendor, { foreignKey: 'vendorId' });
+sequelize.sync({ alter: true })
+  .then(() => console.log("SQLite sincronizado com sucesso!"))
+  .catch(err => console.error("Erro ao sincronizar:", err));
 
-User.hasMany(Order, { foreignKey: 'userId' });
-Order.belongsTo(User, { foreignKey: 'userId' });
-
-Vendor.hasMany(Withdrawal, { foreignKey: 'vendorId' });
-Withdrawal.belongsTo(Vendor, { foreignKey: 'vendorId' });
-
-module.exports = {
-  sequelize,
-  User,
-  Vendor,
-  Product,
-  Order,
-  Withdrawal
-};
+module.exports = sequelize;
