@@ -2,7 +2,7 @@ const { Sequelize } = require("sequelize");
 const path = require("path");
 
 // Caminho do arquivo SQLite
-const databasePath = path.join(__dirname, "../../../data/database.sqlite");
+const databasePath = path.join(__dirname, "../../../src/database.sqlite");
 
 // Criar instância do Sequelize
 const sequelize = new Sequelize({
@@ -11,5 +11,5 @@ const sequelize = new Sequelize({
   logging: false
 });
 
-// Exportar no formato CORRETO
-module.exports = { sequelize };
+// Exporta CORRETAMENTE
+module.exports = sequelize;

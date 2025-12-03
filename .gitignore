@@ -31,3 +31,6 @@ Thumbs.db
 # Banco
 data/*.sqlite
 data/*.db
+
+# infomações do desenvolvedor
+/

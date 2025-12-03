@@ -1,26 +1,35 @@
 const express = require("express");
 const cors = require("cors");
-const routes = require("./src/routes");
-const sequelize = require("./src/config/db");
+const routes = require("./routes");
+const sequelize = require("./config/db");
 
 const app = express();
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+
 app.use(express.json());
 
 // Rotas
 app.use("/api", routes);
 
-// Conectar ao banco e sincronizar
+// Inicialização
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("🔌 SQLite conectado com sucesso!");
+    console.log("🔌 Banco conectado com sucesso!");
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync(); // sem alter: true (mais seguro)
     console.log("📦 Tabelas sincronizadas!");
 
-    const PORT = 3001;
-    app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, () =>
+      console.log(`🚀 Servidor rodando na porta ${PORT}`)
+    );
   } catch (err) {
     console.error("❌ ERRO NO BANCO DE DADOS:", err);
   }
